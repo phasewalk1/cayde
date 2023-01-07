@@ -1,46 +1,36 @@
+import os
 import librosa
 import librosa.display
-import time
 import numpy as np
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
+# Set the path to the directory containing the .wav files
+wav_dir = "example-train/wav"
 
-def load_wav(path):
-    data, sample_rate = librosa.load(path, res_type='kaiser_best')
-    return data, sample_rate
+# Iterate over the .wav files in the directory
+for wav_path in os.listdir(wav_dir):
+    if wav_path.endswith(".wav"):
+        # Load the waveform signal of the .wav file
+        y, sr = librosa.load(os.path.join(wav_dir, wav_path))
+        print(f"Bytes: {len(y)}")
+        print(f"Sample Rate: {sr}")
 
+        # Compute the mel-scaled spectrogram
+        S = librosa.feature.melspectrogram(y=y, sr=sr, n_mels=128, fmax=8000)
 
-def to_mel_spec(data, sr=44100, n_mels=128, fmax=8000):
-    mel_spec = librosa.feature.melspectrogram(y=data, sr=sr, n_mels=n_mels, fmax=fmax)
-    mel_spec_db = librosa.power_to_db(mel_spec, ref=np.max)
-    return mel_spec_db
+        # Convert the spectrogram from power to decibel (dB) units
+        S_dB = librosa.power_to_db(S, ref=np.max)
 
+        # Display the mel spectrogram using a colormap
+        plt.figure(figsize=(10, 4))
+        mesh = librosa.display.specshow(
+            S_dB, x_axis="time", y_axis="mel", sr=sr, fmax=8000
+        )
+        plt.colorbar()
+        plt.title("Mel-scaled Spectrogram")
+        plt.tight_layout()
 
-def build_mesh_img(mel_spec_db, sr=44100, x_axis="time", y_axis="mel"):
-    mesh = librosa.display.specshow(mel_spec_db, sr=sr, x_axis=x_axis, y_axis=y_axis)
-    return mesh
-
-
-def make_save_mesh(mesh):
-    plt.colorbar(mesh, format="%+2.0f dB")
-    plt.title("Mel Spectrogram")
-    plt.savefig("sample/mel_spec.png", bbox_inches="tight")
-
-
-def main():
-    start_time = time.perf_counter()
-
-    data, sr = load_wav("sample/test.wav")
-    mel_spec_db = to_mel_spec(data, sr=sr, n_mels=128, fmax=8000)
-    mesh = build_mesh_img(mel_spec_db, sr=sr)
-    end_time = time.perf_counter()
-
-    make_save_mesh(mesh)
-
-    bench = end_time - start_time
-    return bench
-
-
-if __name__ == "__main__":
-    exec_time = main()
-    print(f"Execution time: {exec_time:.2f} seconds")
+        # Save the mel spectrogram as a .png file
+        filename = wav_path.split(wav_dir)[0].replace(".wav", ".png")
+        print(filename)
+        plt.savefig("mel/" + filename, dpi=300)

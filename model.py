@@ -16,7 +16,7 @@ class MelCRNN(nn.Module):
         )
 
         self.fc = nn.Linear(32, 10)
-        self.loss_fn = nn.CrossEntropyLoss()
+        self.loss_fn = nn.BCELoss()
         self.optimizer = torch.optim.Adam(self.parameters(), lr=0.001)
 
     def forward(self, x, y):
@@ -25,7 +25,7 @@ class MelCRNN(nn.Module):
         x = x.view(x.size(0), -1)
         # apply the fully-connected layer
         x = self.fc(x)
-        loss = self.loss_fn(x,y)
+        loss = self.loss_fn(x, y)
         # zero the gradients
         self.optimizer.zero_grad()
         # compute the gradients
