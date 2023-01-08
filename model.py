@@ -119,7 +119,7 @@ class MelCRNN(nn.Module):
         self.lossfn = nn.BCEWithLogitsLoss()
         self.optimizer = torch.optim.Adam(self.parameters())
 
-    def forward(self, input, hidden):
+    def forward(self, input, hidden, targets):
         # apply the convolutional and max-pooling layers
         conv1_out = self.relu(self.conv1(input))
         pooled1_out = self.pool1(conv1_out)
@@ -138,5 +138,14 @@ class MelCRNN(nn.Module):
         rnn_out, hidden = self.rnn(rnn_input, hidden)
         ## pass into the fully-connected layer and sigmoid activation
         prediction = self.sigmoid(self.fc(rnn_out))
+        
+        ## compute the loss
+        loss = self.lossfn(prediction, targets)
+        ## zero the gradients
+        self.optimizer.zero_grad()
+        ## apply backprop
+        loss.backward()
+        self.optimizer.step()
+        
 
         return prediction, hidden
