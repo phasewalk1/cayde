@@ -18,10 +18,3 @@ The `cayde` system is in very early stages of development and is currently in it
 
 ## The [Dataset](https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification?resource=download) used for development (Proof of Concept)
 As we begin building the model for a music recommendation system, we first need a way to extract features (such as genre) from segments of audio files. Since the application (SB) isn't ready to provide us with a training set, we utilize the GTZAN dataset that retains a directory structure such that genre labels can be easily extracted in order to perform supervised learning with the CNN model (see below).
-
-## The CNN (Binary Classifier) Model
-Just as implemented in [Adiyansjaha, Alexander A S Gunawana, Derwin Suhartono: Music Recommender System Based on Genre Using Convolutional Recurrent Neural Networks](https://www.sciencedirect.com/science/article/pii/S1877050919310646), the Binary Classifier that `cayde` implements follows the following architecture:
->> * Five layers of convolutional with kernel 3 x 3, feature maps (47-95-95-142-190), stride of 1, and using padding to maintain input dimensions.
->> * Each convolutional layer uses batch normalization and ReLU activation.
->> * Max-pooling layers using kernel ((2x4)-(2x4)-(2x4)-(3x5)-(4x4)) with the same stride.
->> * Outputted to a sigmoid function.
