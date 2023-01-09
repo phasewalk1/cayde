@@ -53,7 +53,7 @@ def train():
     plt.legend()
     plt.show()
 
-    model.save("model.h5")
+    model.save_weights("checkpoints/ckpt1")
 
 
 if __name__ == "__main__":
