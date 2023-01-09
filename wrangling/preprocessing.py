@@ -169,11 +169,7 @@ def batch_save_mfcc(
     """
 
     # dictionary to store data
-    extractings = {
-        "mapping": [],
-        "MFCCs": [],
-        "labels": [],
-    }
+    extractings = {"mapping": [], "labels": [], "MFCCs": []}
 
     N_SAMPLES_PER_SEGMENT = int(SAMPLES_PER_TRACK / n_segments)
     EXPECTED_MFCC_PER_SEGMENT = np.ceil(N_SAMPLES_PER_SEGMENT / hop_length)

@@ -1,14 +1,14 @@
 import torch
 import torch.nn as nn
+import tensorflow as tf
+from tensorflow import keras
 
 
 """This model is based on the paper:
     "Music Recommender System Based on Genre using Convolutional Recurrent Neural Networks": https://www.sciencedirect.com/science/article/pii/S1877050919310646
-    The model is a CNN 
+    The model is a CNN that uses binary classification to determine which genre an audio segment belongs to
 """
-
-
-class BinaryClassifierCNN(nn.Module):
+class ProcediaBinaryClassifierCNN(nn.Module):
     # one input channel
     GRAYSCALE_INPUT_DIM = 1
     # feature maps for each convolutional layer
@@ -34,7 +34,8 @@ class BinaryClassifierCNN(nn.Module):
     MAXPOOL4_KS = (3, 5)
     MAXPOOL5_KS = (4, 4)
 
-    def __init__(self, hidden_dim, output_dim, n_layers):
+    def __init__(self, output_dim):
+        super(ProcediaBinaryClassifierCNN, self).__init__()
         """Define the Convolutional layers"""
         # 1 input channel x 47 conv filters
         self.conv1 = nn.Conv2d(
@@ -111,7 +112,7 @@ class BinaryClassifierCNN(nn.Module):
         self.sigmoid = nn.Sigmoid()
 
         """Define the fully-connected layer (output) layer"""
-        self.fc = nn.Linear(hidden_dim, output_dim)
+        self.fc = nn.Linear(self.CONV_END_N_FILTERS, output_dim)
 
         """Define the loss function and optimizer"""
         self.lossfn = nn.BCEWithLogitsLoss()
@@ -133,7 +134,7 @@ class BinaryClassifierCNN(nn.Module):
         # return the flattened output of the convolutional layers
         return pooled5_out.view(input.size(0), -1)
 
-    def forward(self, input, hidden, targets):
+    def forward(self, input, targets):
         ## apply the convolutional and max-pooling layers and return the flattened output
         conv_pool_yhat = self.apply_conv_pool(input)
         ## pass into the fully-connected layer and sigmoid activation
@@ -147,4 +148,54 @@ class BinaryClassifierCNN(nn.Module):
         loss.backward()
         self.optimizer.step()
 
-        return prediction, hidden
+        return prediction, loss
+
+
+"""This is another Binary Classifier, but this time using MFCCs as input. This model
+also retains a higher level of simplicity since it was not derived from the paper, however,
+implemented in a similar fashion to the CNN model above."""
+class GenreClassifierMFCC(nn.Module):
+    def __init__(self, inputs):
+        super(GenreClassifierMFCC, self).__init__()
+        self.flatten = nn.Flatten()
+        self.fc1 = nn.Linear(inputs.shape[1] * inputs.shape[2], 512)
+        self.fc2 = nn.Linear(512, 256)
+        self.fc3 = nn.Linear(256, 64)
+        self.fc4 = nn.Linear(64, 10)
+        self.relu = nn.ReLU()
+        self.softmax = nn.Softmax(dim=1)
+
+        self.lossfn = nn.CrossEntropyLoss()
+        self.optimizer = torch.optim.Adam(self.parameters())
+
+    def forward(self,x,y):
+        x = self.flatten(x)
+        x = self.relu(self.fc1(x))
+        x = self.relu(self.fc2(x))
+        x = self.relu(self.fc3(x))
+        x = self.softmax(self.fc4(x))
+
+        loss = self.lossfn(x, y)
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        return x, loss
+
+
+def build_keras_genre_classifier(inputs):
+    model = keras.Sequential([
+        keras.layers.Flatten(input_shape=(inputs.shape[1], inputs.shape[2])),
+        keras.layers.Dense(512, activation='relu'),
+        keras.layers.Dense(256, activation='relu'),
+        keras.layers.Dense(64, activation='relu'),
+        keras.layers.Dense(10, activation='softmax')
+    ])
+    optimizer = keras.optimizers.Adam(learning_rate=0.0001)
+    model.compile( 
+        optimizer=optimizer,
+        loss='sparse_categorical_crossentropy',
+        metrics=['accuracy']
+    )
+
+    return model
