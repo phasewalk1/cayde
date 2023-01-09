@@ -1,0 +1,26 @@
+[package]
+name = "sundance"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "sundance"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "sundance-encoder"
+path = "src/main.rs"
+
+[dependencies]
+argh = "0.1.9"
+bitmatrix = "0.1.0"
+image = "0.24.5"
+ndarray = "0.15.6"
+onehot = { version = "0.1.0", features = ["derive"] }
+serde = { version = "1.0.152", features = ["derive"] }
+serde_json = "1.0.91"
+walkdir = "2.3.2"
+
+[build-dependencies]
+anyhow = "*"

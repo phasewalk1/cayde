@@ -2,8 +2,12 @@ from models.kgcmfcc import KerasGenreClassifier
 from trainer import Trainer, load_data
 
 
+# Points to the preprocessed dataset
 PROCESSED_DATASET = "data.json"
+# Num Epochs
 EPOCHS = 50
+# Num of training runs (train for EPOCHS * SOLSTICE epochs)
+SOLSTICE = 10
 BATCH_SIZE = 128
 
 
@@ -13,7 +17,8 @@ def main():
     trainer = Trainer(model, inputs, targets)
 
     # train indefinitely and save checkpoints
-    while True:
+    for sol in range(SOLSTICE):
+        print(f"\nEntering solstice {sol} ... Training for {EPOCHS} epochs")
         latest_ckpt = trainer.find_latest_ckpt(ckpt_dir="checkpoints")
         print(f"Training from checkpoint {latest_ckpt}...")
         trainer.train(

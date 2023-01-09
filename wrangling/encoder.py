@@ -1,5 +1,8 @@
 """encoder.py - Encodes image (Mel-scaled spectrogram) pixels into one-hot vectors."""
 
+# Sundance Encoder - The Rust impl of the one-hot-encoder
+from sundance import Encoder as SundanceEncoder
+
 import numpy as np
 import os
 import json

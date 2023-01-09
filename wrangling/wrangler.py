@@ -2,10 +2,18 @@
 
 from preprocessors import MFCCBuilder
 from encoder import BatchEncoder
+
+from PIL import Image
+import numpy as np
 import sys
+import os
+import json
 
 DATASET = "example-train/GTZAN-Full"
 OUTPUT_FILE = "data.json"
+
+IMG_DIR = "mel/"
+ENCODINGS_OUT = "mel_encoded_batch-1.json"
 
 
 class Wrangler:
@@ -17,8 +25,8 @@ class Wrangler:
             builder = MFCCBuilder(output_path=OUTPUT_FILE)
             builder.segmented_batch_save_mfcc(dataset_path=DATASET)
         elif self.mode == "encode":
-            encoder = BatchEncoder(image_dir=DATASET)
-            encoder.batch_encode(output_path=OUTPUT_FILE)
+            encoder = BatchEncoder(image_dir=IMG_DIR)
+            encoder.batch_encode(output_path=ENCODINGS_OUT)
         else:
             raise ValueError("Invalid mode. Please choose 'mfcc' or 'encode'.")
 

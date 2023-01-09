@@ -2,3 +2,9 @@
 **/__pycache__/
 data.json
 example-train/GTZAN-Full/
+
+# Added by cargo
+
+sundance/target
+sundance/Cargo.lock
+sundance/encodings.json
