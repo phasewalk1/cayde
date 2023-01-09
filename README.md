@@ -9,7 +9,9 @@ Different implementations in the wild/pre-processing references:
 * [Roberts, Leland: Understanding the Mel-Spectrogram](https://medium.com/analytics-vidhya/understanding-the-mel-spectrogram-fca2afa2ce53)
 
 ## Development Status
-The `cayde` system is in very early stages of development and is currently in its research stage. Primary focus of development is data processing and normalization, whilst also continuing research into the various references listed along others which may or may not be added to the above list in the future.
+The `cayde` system is in very early stages of development and is currently in its research stage. Primary focus of development is data processing and normalization, whilst also continuing research into the various references listed along others which may or may not be added to the above list in the future. Below are some figures of the alternative implementations being tested. This implementation differs from the architectures implemented in the paper referenced above, primarily in it accepting as inputs the Mel-frequency Cepstral Coefficients instead of one-hot-encoded spectrogram pixels.
+
+<img src="perf/model_performance-ckpt5.png" alt="image1" style="width:50%; display:inline-block;">
 
 ## About Preprocessing
 `cayde` is trained on the Mel-scaled spectrograms and MFCCs (Mel-frequency Cepstral Coefficients) of the segmented audio files. We segment each audio file into 5 segments each, allowing us to increase the execution time of the preprocessing whilst simultaneously, increasing the number of data points in our training/hold-out sets. We extract the MFCCs from each segment, and use the development training set to extract the provided semantic labels (see below) used for supervised learning. The file [data.json](https://github.com/phasewalk1/cayde/blob/master/data.json) is an example training set that contains the preprocessed labels, mappings, and MFCCs from a reduced version of the GTZAN dataset. 

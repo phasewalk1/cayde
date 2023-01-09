@@ -8,6 +8,8 @@ from tensorflow import keras
     "Music Recommender System Based on Genre using Convolutional Recurrent Neural Networks": https://www.sciencedirect.com/science/article/pii/S1877050919310646
     The model is a CNN that uses binary classification to determine which genre an audio segment belongs to
 """
+
+
 class ProcediaBinaryClassifierCNN(nn.Module):
     # one input channel
     GRAYSCALE_INPUT_DIM = 1
@@ -154,6 +156,8 @@ class ProcediaBinaryClassifierCNN(nn.Module):
 """This is another Binary Classifier, but this time using MFCCs as input. This model
 also retains a higher level of simplicity since it was not derived from the paper, however,
 implemented in a similar fashion to the CNN model above."""
+
+
 class GenreClassifierMFCC(nn.Module):
     def __init__(self, inputs):
         super(GenreClassifierMFCC, self).__init__()
@@ -168,7 +172,7 @@ class GenreClassifierMFCC(nn.Module):
         self.lossfn = nn.CrossEntropyLoss()
         self.optimizer = torch.optim.Adam(self.parameters())
 
-    def forward(self,x,y):
+    def forward(self, x, y):
         x = self.flatten(x)
         x = self.relu(self.fc1(x))
         x = self.relu(self.fc2(x))
@@ -183,19 +187,23 @@ class GenreClassifierMFCC(nn.Module):
         return x, loss
 
 
-def build_keras_genre_classifier(inputs):
-    model = keras.Sequential([
-        keras.layers.Flatten(input_shape=(inputs.shape[1], inputs.shape[2])),
-        keras.layers.Dense(512, activation='relu'),
-        keras.layers.Dense(256, activation='relu'),
-        keras.layers.Dense(64, activation='relu'),
-        keras.layers.Dense(10, activation='softmax')
-    ])
-    optimizer = keras.optimizers.Adam(learning_rate=0.0001)
-    model.compile( 
-        optimizer=optimizer,
-        loss='sparse_categorical_crossentropy',
-        metrics=['accuracy']
-    )
+"""The same model architecture as above, but this time implemented using Keras."""
 
-    return model
+
+class KerasGenreClassifier(keras.Model):
+    def __init__(self, inputs):
+        super(KerasGenreClassifier, self).__init__()
+        self.flatten = keras.layers.Flatten(
+            input_shape=(inputs.shape[1], inputs.shape[2])
+        )
+        self.fc1 = keras.layers.Dense(512, activation="relu")
+        self.fc2 = keras.layers.Dense(256, activation="relu")
+        self.fc3 = keras.layers.Dense(64, activation="relu")
+        self.fc4 = keras.layers.Dense(10, activation="softmax")
+
+    def call(self, inputs):
+        x = self.flatten(inputs)
+        x = self.fc1(x)
+        x = self.fc2(x)
+        x = self.fc3(x)
+        return self.fc4(x)

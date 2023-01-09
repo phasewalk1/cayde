@@ -1,3 +1,5 @@
+"""encoder.py - Encodes image (Mel-scaled spectrogram) pixels into one-hot vectors."""
+
 import numpy as np
 import os
 from PIL import Image
