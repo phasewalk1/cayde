@@ -2,6 +2,7 @@
 
 import numpy as np
 import os
+import json
 from PIL import Image
 
 
@@ -29,13 +30,39 @@ class Encoder:
         return self.encoded_pixels
 
 
-def batch_encode(image_dir):
-    encoded_pixels = np.array([])
-    for image in os.listdir(image_dir):
-        if image.endswith(".png"):
-            image_path = image_dir + image
-            image = Image.open(image_path)
-            pixels = np.array(image)
+class BatchEncoder(Encoder):
+    def __init__(self, image_dir):
+        self.image_dir = image_dir
+        self.batch = os.listdir(image_dir)
+        self.batch_size = len(self.batch)
+        print(f"Encoding {self.batch_size} images...")
+
+    def batch_encode(self, output_path="mel_encoded_batch-1.json"):
+        encoded_images = []
+        output = {
+            "batch_size": self.batch_size,
+            "images": self.image_dir,
+            "encodings": [],
+        }
+
+        for i, filename in enumerate(self.batch):
+            print(f"Encoding image {i+1}/{self.batch_size}...")
+            img = Image.open(os.path.join(self.image_dir, filename))
+            pixels = np.array(img)
             encoder = Encoder(pixels)
-            encoded_pixels = np.append(encoded_pixels, encoder.encode())
-    return encoded_pixels
+            encoded_pixels = encoder.encode()
+            print(encoded_pixels)
+            encoded_images.append(encoded_pixels)
+
+        assert len(encoded_images) == self.batch_size
+
+        output["encodings"] = encoded_images
+        with open(output_path, "w") as f:
+            json.dump(output, f, indent=4)
+
+        return encoded_images
+
+
+if __name__ == "__main__":
+    encoder = BatchEncoder("mel/")
+    encoded_images = encoder.batch_encode()
