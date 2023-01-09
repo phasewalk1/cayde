@@ -3,9 +3,19 @@ import librosa
 import librosa.display
 import numpy as np
 import matplotlib.pyplot as plt
+import json
 
 # Set the path to the directory containing the .wav files
-WAVDIR = "example-train/wav/"
+DATASET_PATH = "example-train/gtzan-genre"
+# Set the path to the output directory
+OUTPUT_PATH_JSON = "data.json"
+
+# Set the sample rate for all files loaded from the DATASET_PATH
+SAMPLE_RATE = 22050
+# The duration of each .wav used in the dataset
+DURATION = 30  # in seconds
+# The number of samples per track
+SAMPLES_PER_TRACK = SAMPLE_RATE * DURATION
 
 # Set STFT params
 N_FFT = 2048
@@ -138,6 +148,78 @@ def compute_mfcc(signal, sr, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mfcc=N_MFCC):
     return MFCCs
 
 
+def batch_save_mfcc(
+    dataset_path,
+    json_path,
+    n_mfcc=N_MFCC,
+    n_fft=N_FFT,
+    hop_length=HOP_LENGTH,
+    win_func=np.hanning,
+    n_segments=5,
+):
+    """
+    # Parameters:
+        dataset_path (str): The path to the dataset containing audio files (.wav)
+        json_path (str): The path to the output json that will store our labels and MFCCs
+        n_mfcc (int, optional): Number of MFCCs to generate per segment. Defaults to N_MFCC (13).
+        n_fft (int, optional): Number of FFT bands to compute. Defaults to N_FFT (2048).
+        hop_length (int, optional): The linspace separator value for STFT. Defaults to HOP_LENGTH (512).
+        win_func (int, optional): Which window function to apply. Defaults to np.hanning.
+        n_segments (int, optional): Number of segments to split each audio file into. Defaults to 5.
+    """
+
+    # dictionary to store data
+    extractings = {
+        "mapping": [],
+        "MFCCs": [],
+        "labels": [],
+    }
+
+    N_SAMPLES_PER_SEGMENT = int(SAMPLES_PER_TRACK / n_segments)
+    EXPECTED_MFCC_PER_SEGMENT = np.ceil(N_SAMPLES_PER_SEGMENT / hop_length)
+
+    # loop through dataset that's organized by genre
+    for genre_idx, (dirpath, _dirnames, filenames) in enumerate(os.walk(dataset_path)):
+        # ensures we're not at the root level
+        if dirpath is not dataset_path:
+            # save the semantic label
+            dirpath_components = dirpath.split("/")
+            semantic_label = dirpath_components[-1]
+            extractings["mapping"].append(semantic_label)
+            print(f"\nProcessing {semantic_label}")
+
+            # process files for a specific genre
+            for f in filenames:
+                # load audio file
+                file_path = os.path.join(dirpath, f)
+                signal, sr = librosa.load(file_path, sr=SAMPLE_RATE)
+
+                # process segments extracting MFCCs and storing data
+                for s in range(n_segments):
+                    # segment the signal into a slice of the audio file, this increases our training dataset size
+                    start_sample = N_SAMPLES_PER_SEGMENT * s
+                    finish_sample = start_sample + N_SAMPLES_PER_SEGMENT
+                    # compute the MFCC matrix for the segment
+                    mfcc = librosa.feature.mfcc(
+                        y=signal[start_sample:finish_sample],
+                        sr=sr,
+                        n_fft=n_fft,
+                        n_mfcc=n_mfcc,
+                        hop_length=hop_length,
+                    )
+                    # transpose the mfcc matrix
+                    MFCC = mfcc.T
+                    # store the MFCCs for the segment if it has the expected length
+                    if len(MFCC) == EXPECTED_MFCC_PER_SEGMENT:
+                        extractings["MFCCs"].append(MFCC.tolist())
+                        extractings["labels"].append(genre_idx - 1)
+                        print(f"{file_path}, segment: {s}")
+
+    # save MFCCs to json file
+    with open(json_path, "w") as out:
+        json.dump(extractings, out, indent=4)
+
+
 # display MFCCs
 def show_mfcss(MFCCs, sr, hop_length=HOP_LENGTH, save=False, outpath=None):
     plt.clf()
@@ -160,8 +242,7 @@ def show_mfcss(MFCCs, sr, hop_length=HOP_LENGTH, save=False, outpath=None):
 
 
 def main():
-    # compute and output the mel-scaled spectrograms for all .wav files in the directory
-    batch_mel(WAVDIR)
+    batch_save_mfcc(DATASET_PATH, OUTPUT_PATH_JSON)
 
 
 if __name__ == "__main__":

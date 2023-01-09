@@ -2,7 +2,13 @@ import torch
 import torch.nn as nn
 
 
-class MelCRNN(nn.Module):
+"""This model is based on the paper:
+    "Music Recommender System Based on Genre using Convolutional Recurrent Neural Networks": https://www.sciencedirect.com/science/article/pii/S1877050919310646
+    The model is a CNN 
+"""
+
+
+class BinaryClassifierCNN(nn.Module):
     # one input channel
     GRAYSCALE_INPUT_DIM = 1
     # feature maps for each convolutional layer
@@ -104,14 +110,6 @@ class MelCRNN(nn.Module):
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
-        """Define the recurrent layer"""
-        self.lstm = nn.LSTM(
-            self.CONV_END_N_FILTERS,
-            hidden_dim,
-            n_layers,
-            batch_first=True,
-        )
-
         """Define the fully-connected layer (output) layer"""
         self.fc = nn.Linear(hidden_dim, output_dim)
 
@@ -119,7 +117,7 @@ class MelCRNN(nn.Module):
         self.lossfn = nn.BCEWithLogitsLoss()
         self.optimizer = torch.optim.Adam(self.parameters())
 
-    def forward(self, input, hidden, targets):
+    def apply_conv_pool(self, input):
         # apply the convolutional and max-pooling layers
         conv1_out = self.relu(self.conv1(input))
         pooled1_out = self.pool1(conv1_out)
@@ -132,13 +130,15 @@ class MelCRNN(nn.Module):
         conv5_out = self.relu(self.conv5(pooled4_out))
         pooled5_out = self.pool5(conv5_out)
 
-        ## flatten the output of the convolutional layers
-        rnn_input = pooled5_out.view(input.size(0), -1)
-        ## pass into the recurrent network
-        rnn_out, hidden = self.rnn(rnn_input, hidden)
+        # return the flattened output of the convolutional layers
+        return pooled5_out.view(input.size(0), -1)
+
+    def forward(self, input, hidden, targets):
+        ## apply the convolutional and max-pooling layers and return the flattened output
+        conv_pool_yhat = self.apply_conv_pool(input)
         ## pass into the fully-connected layer and sigmoid activation
-        prediction = self.sigmoid(self.fc(rnn_out))
-        
+        prediction = self.sigmoid(self.fc(conv_pool_yhat))
+
         ## compute the loss
         loss = self.lossfn(prediction, targets)
         ## zero the gradients
@@ -146,6 +146,5 @@ class MelCRNN(nn.Module):
         ## apply backprop
         loss.backward()
         self.optimizer.step()
-        
 
         return prediction, hidden
