@@ -41,11 +41,14 @@ The `cayde` system is in very early stages of development and is currently in it
 `cayde` is trained on the Mel-scaled spectrograms and MFCCs (Mel-frequency Cepstral Coefficients) of the segmented audio files. We segment each audio file into 5 segments each, allowing us to increase the execution time of the preprocessing whilst simultaneously, increasing the number of data points in our training/hold-out sets. We extract the MFCCs from each segment, and use the development training set to extract the provided semantic labels (see below) used for supervised learning. The file `data.json` is constructed as a result of running [wrangler.py](https://github.com/phasewalk1/cayde/tree/master/wrangling/wrangler.py), and is an example training set that contains the preprocessed labels, mappings, and MFCCs from a reduced version of the GTZAN dataset.
 
 **Mel-scaled Spectrograms**
+
 Below is an example spectrogram used for feature extraction in the Convolutional Recurrent net:
 <img src="mel/blues.00000.png">
 
 **Mel-frequency Cepstral Coefficients**
+
 Here's an example of a MFCC batch computed via the `MFCCBuilder.segmented_batch_save_mfcc` method:
+
 ```json
 "MFCCs": [
         [
