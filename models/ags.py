@@ -1,4 +1,4 @@
-"""procedia.py - The PyTorch implementation of the CNN model used in the Procedia paper to classifiy audio segments into genres and
+"""ags.py - The PyTorch implementation of the CNN/CRNN models used in the (Adiyansjah, Gunawan, Suhartono) paper to classifiy audio segments into genres and
 extract features from the audio segments to be used in the RNN model that serves recommendation purposes."""
 
 import torch
@@ -11,7 +11,7 @@ import torch.nn as nn
 """
 
 
-class ProcediaBinaryClassifierCNN(nn.Module):
+class BinaryClassifierCNN(nn.Module):
     # one input channel
     GRAYSCALE_INPUT_DIM = 1
     # feature maps for each convolutional layer
@@ -38,7 +38,7 @@ class ProcediaBinaryClassifierCNN(nn.Module):
     MAXPOOL5_KS = (4, 4)
 
     def __init__(self, output_dim):
-        super(ProcediaBinaryClassifierCNN, self).__init__()
+        super(BinaryClassifierCNN, self).__init__()
         """Define the Convolutional layers"""
         # 1 input channel x 47 conv filters
         self.conv1 = nn.Conv2d(
@@ -152,3 +152,57 @@ class ProcediaBinaryClassifierCNN(nn.Module):
         self.optimizer.step()
 
         return prediction, loss
+
+
+class CRNNExtractorModel(nn.Module):
+    def __init__(self):
+        # Setup the convolutional/batch-norm layers
+        self.conv1 = nn.Conv2d(
+            in_channels=68,
+            out_channels=137,
+            kernel_size=(3, 3),
+            stride=1,
+            padding=1,
+        )
+        self.bn1 = nn.BatchNorm2d(137)
+
+        self.conv2 = nn.Conv2d(
+            in_channels=137,
+            out_channels=137,
+            kernel_size=(3, 3),
+            stride=1,
+            padding=1,
+        )
+        self.bn2 = nn.BatchNorm2d(137)
+
+        self.conv3 = nn.Conv2d(
+            in_channels=137,
+            out_channels=137,
+            kernel_size=(3, 3),
+            stride=1,
+            padding=1,
+        )
+        self.bn3 = nn.BatchNorm2d(137)
+
+        self.conv4 = nn.Conv2d(
+            in_channels=137,
+            out_channels=137,
+            kernel_size=(3, 3),
+            stride=1,
+            padding=1,
+        )
+        self.bn4 = nn.BatchNorm2d(137)
+
+        self.relu = nn.ReLU()
+
+    def forward(self, x):
+        # layer 1 pass
+        x = self.relu(self.bn1(self.conv1(x)))
+        # layer 2 pass
+        x = self.relu(self.bn2(self.conv2(x)))
+        # layer 3 pass
+        x = self.relu(self.bn3(self.conv3(x)))
+        # layer 4 pass
+        x = self.relu(self.bn4(self.conv4(x)))
+
+        return x
