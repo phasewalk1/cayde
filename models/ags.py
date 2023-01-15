@@ -236,7 +236,7 @@ class CRNNExtractorModel(nn.Module):
         x = self.relu(self.bn4(self.conv4(x)))
         x = self.dropout(x)
         x = self.maxpool4(x)
-        
+
         # reshape the feature maps to be fed into the GRU
         x = x.reshape(x.size(0), x.size(1), -1)
         x, _ = self.gru1(x)

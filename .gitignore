@@ -3,7 +3,7 @@
 data.json
 example-train/GTZAN-Full/
 
-# Added by cargo
+mel_encoded_batch-1.json
 
 sundance/target
 sundance/Cargo.lock

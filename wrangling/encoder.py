@@ -1,12 +1,11 @@
 """encoder.py - Encodes image (Mel-scaled spectrogram) pixels into one-hot vectors."""
 
-# Sundance Encoder - The Rust impl of the one-hot-encoder
-from sundance import Encoder as SundanceEncoder
-
 import numpy as np
 import os
 import json
+
 from PIL import Image
+from .view import Viewer
 
 
 class Encoder:
@@ -38,10 +37,11 @@ class BatchEncoder(Encoder):
         self.image_dir = image_dir
         self.batch = os.listdir(image_dir)
         self.batch_size = len(self.batch)
-        print(f"Encoding {self.batch_size} images...")
+        self.viewer = Viewer()
 
     def batch_encode(self, output_path="mel_encoded_batch-1.json"):
         encoded_images = []
+        self.viewer.debug(f"Encoding batch to {output_path}...")
         output = {
             "batch_size": self.batch_size,
             "images": self.image_dir,
@@ -49,16 +49,17 @@ class BatchEncoder(Encoder):
         }
 
         for i, filename in enumerate(self.batch):
-            print(f"Encoding image {i+1}/{self.batch_size}...")
+            self.viewer.info(f"Encoding image {i+1}/{self.batch_size}...")
             img = Image.open(os.path.join(self.image_dir, filename))
             pixels = np.array(img)
             encoder = Encoder(pixels)
             encoded_pixels = encoder.encode()
-            print(encoded_pixels)
-            encoded_images.append(encoded_pixels)
+            self.viewer.debug(f"Encoded pixels --> {encoded_pixels}")
+            encoded_images.append(encoded_pixels.tolist())
 
         assert len(encoded_images) == self.batch_size
 
+        self.viewer.debug(f"Dumping jsonified encodings to {output_path}...")
         output["encodings"] = encoded_images
         with open(output_path, "w") as f:
             json.dump(output, f, indent=4)

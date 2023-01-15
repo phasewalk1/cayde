@@ -7,6 +7,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 
+from .view import Viewer
+
 # Set the sample rate for all files loaded from the DATASET_PATH
 SAMPLE_RATE = 22050
 # The duration of each .wav used in the dataset
@@ -166,6 +168,7 @@ class MFCCBuilder:
     def __init__(self, output_path):
         assert output_path.endswith(".json")
         self.output_path = output_path
+        self.view = Viewer()
 
     # compute Mel-frequency cepstral coefficients (MFCCs)
     def compute_mfcc(signal, sr, n_fft=N_FFT, hop_length=HOP_LENGTH, n_mfcc=N_MFCC):
@@ -209,7 +212,7 @@ class MFCCBuilder:
                 dirpath_components = dirpath.split("/")
                 semantic_label = dirpath_components[-1]
                 extractings["mapping"].append(semantic_label)
-                print(f"\nProcessing {semantic_label}")
+                self.view.info(f"\nProcessing {semantic_label}")
 
                 # process files for a specific genre
                 for f in filenames:
@@ -236,7 +239,7 @@ class MFCCBuilder:
                         if len(MFCC) == EXPECTED_MFCC_PER_SEGMENT:
                             extractings["MFCCs"].append(MFCC.tolist())
                             extractings["labels"].append(genre_idx - 1)
-                            print(f"{file_path}, segment: {s}")
+                            self.view.debug(f"{file_path}, segment: {s}")
 
         # save MFCCs to json file
         with open(self.output_path, "w") as out:

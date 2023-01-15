@@ -1,13 +1,7 @@
 """wrangler.py - Uses defined preprocessors to wrangle the data into a format that can be used to train the model."""
 
-from preprocessors import MFCCBuilder
-from encoder import BatchEncoder
-
-from PIL import Image
-import numpy as np
-import sys
-import os
-import json
+from .preprocessors import MFCCBuilder
+from .encoder import BatchEncoder
 
 DATASET = "example-train/GTZAN-Reduced"
 OUTPUT_FILE = "data.json"
@@ -29,11 +23,3 @@ class Wrangler:
             encoder.batch_encode(output_path=ENCODINGS_OUT)
         else:
             raise ValueError("Invalid mode. Please choose 'mfcc' or 'encode'.")
-
-
-# Currently, this script acts to preprocess the reduced GTZAN dataset into a JSON file that contains mappings, labels, and MFCCs
-# used to supervise the genre classifier model.
-if __name__ == "__main__":
-    mode = sys.argv[1]
-    wrangler = Wrangler(mode=mode)
-    wrangler.preprocess()

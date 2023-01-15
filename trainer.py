@@ -1,10 +1,12 @@
-from sklearn.model_selection import train_test_split
 import json
 import numpy as np
 import os
 import re
 import matplotlib.pyplot as plt
+
+from wrangling.view import Viewer
 from tensorflow import keras
+from sklearn.model_selection import train_test_split
 
 
 def load_data(processed_dataset_path="data.json"):
@@ -22,9 +24,10 @@ class Trainer:
         self.model = model
         self.inputs = inputs
         self.targets = targets
+        self.view = Viewer()
 
     def split_data(self, train_size=0.8, test_size=0.2):
-        print("\nSplitting data...")
+        self.view.info("\nSplitting data...")
         if train_size + test_size != 1:
             raise ValueError("Train size and test size must add up to 1.")
         x_train, x_test, y_train, y_test = train_test_split(
@@ -42,7 +45,7 @@ class Trainer:
                 checkpoints.append(filename)
         for ckpt in sorted(checkpoints):
             ckpt_num = int(re.findall(r"\d+", ckpt)[0])
-        print(f"Latest checkpoint: {ckpt_num} found.")
+        self.view.info(f"Latest checkpoint: {ckpt_num} found.")
         new_ckpt_num = ckpt_num
         return new_ckpt_num
 
@@ -69,7 +72,7 @@ class Trainer:
             if ckpt_mode and ckpt_path is None:
                 raise ValueError("ckpt_path must be specified in ckpt_mode.")
             elif ckpt_mode:
-                print(f"Loading model from checkpoint...{ckpt_path}")
+                self.view.debug(f"Loading model from checkpoint...{ckpt_path}")
                 self.model.load_weights(ckpt_path)
 
             self.model.fit(
@@ -81,10 +84,10 @@ class Trainer:
             )
 
             new_ckpt = self.find_latest_ckpt("checkpoints") + 1
-            print(f"Saving model to checkpoint...{new_ckpt}")
+            self.view.debug(f"Saving model to checkpoint...{new_ckpt}")
             self.model.save_weights(f"checkpoints/ckpt-{new_ckpt}")
 
-            print("Plotting model performance...")
+            self.view.info("Plotting model performance...")
             plt.plot(self.model.history.history["accuracy"], label="train accuracy")
             plt.plot(self.model.history.history["val_accuracy"], label="test accuracy")
             plt.ylabel("Accuracy")
