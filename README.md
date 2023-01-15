@@ -25,6 +25,7 @@ Different implementations in the wild/pre-processing references:
 ### [Sundance](https://github.com/phasewalk1/cayde/tree/master/sundance)
 
 In explaining the repository structure above, you may have noticed that we elided the `sundance` directory. This is because it deserves an explanation of its own. `sundance` is a Rust crate that aims to handle the heavy lifting of the data pipeline so as to speed up the preprocessing while development is still under way. `sundance` currently provides only one workflow, computing batches of _one-hot encoded_ pixel arrays from the Mel-scaled spectrograms within [mel](https://github.com/phasewalk1/cayde/tree/master/mel). While plans are made to continue porting preprocessors from [wrangling](https://github.com/phasewalk1/cayde/tree/master/wrangling) over to [sundance](https://github.com/phasewalk1/cayde/tree/master/sundance), it is largely the most complex stage of development and thus, may remain largely unstable for the foreseeable future. Workflows that we desire to implement in Rust instead of Python include, but are not limited to:
+
 - [x] _batch encoding (via one-hot)_ Mel-scaled Spectrograms
 - [ ] _batch builder_ for Mel-scaled Spectrogram dumps
 - [ ] _batch computing MFCCs_ and extracting semantic labels from GTZAN
@@ -33,11 +34,55 @@ In explaining the repository structure above, you may have noticed that we elide
 
 The `cayde` system is in very early stages of development and is currently in its research stage. Primary focus of development is data processing and normalization, whilst also continuing research into the various references listed along others which may or may not be added to the above list in the future. Below are some figures of the alternative implementations being tested. This implementation differs from the architectures implemented in the paper referenced above, primarily in it accepting as inputs the Mel-frequency Cepstral Coefficients instead of one-hot-encoded spectrogram pixels. The model below is a Binary Classifier for genre classification, and was trained on the full GTZAN dataset, whilst only a reduced version of it is included in the repository [here](https://github.com/phasewalk1/cayde/tree/master/example-train/GTZAN-reduced).
 
-<img src="perf/model_performance-ckpt9.png" alt="image1" style="display:inline-block;">
+<img src="perf/model_performance-ckpt9.png" alt="image1">
 
 ## About Preprocessing
 
 `cayde` is trained on the Mel-scaled spectrograms and MFCCs (Mel-frequency Cepstral Coefficients) of the segmented audio files. We segment each audio file into 5 segments each, allowing us to increase the execution time of the preprocessing whilst simultaneously, increasing the number of data points in our training/hold-out sets. We extract the MFCCs from each segment, and use the development training set to extract the provided semantic labels (see below) used for supervised learning. The file `data.json` is constructed as a result of running [wrangler.py](https://github.com/phasewalk1/cayde/tree/master/wrangling/wrangler.py), and is an example training set that contains the preprocessed labels, mappings, and MFCCs from a reduced version of the GTZAN dataset.
+
+**Mel-scaled Spectrograms**
+Below is an example spectrogram used for feature extraction in the Convolutional Recurrent net:
+<img src="mel/blues.00000.png">
+
+**Mel-frequency Cepstral Coefficients**
+Here's an example of a MFCC batch computed via the `MFCCBuilder.segmented_batch_save_mfcc` method:
+```json
+"MFCCs": [
+        [
+            [
+                -87.6069564819336,
+                118.83728790283203,
+                -14.530750274658203,
+                8.882493019104004,
+                5.562922954559326,
+                -18.97341537475586,
+                11.625785827636719,
+                15.937507629394531,
+                19.477306365966797,
+                9.90665054321289,
+                2.2180898189544678,
+                -0.5555779337882996,
+                0.2503119111061096
+            ],
+            [
+                -63.46507263183594,
+                121.4153060913086,
+                -10.391878128051758,
+                9.364693641662598,
+                15.433528900146484,
+                -18.69662857055664,
+                11.500993728637695,
+                7.160057544708252,
+                15.920083999633789,
+                8.458211898803711,
+                5.4518303871154785,
+                2.2130210399627686,
+                -0.7875062823295593
+            ],
+            ...
+        ]
+]
+```
 
 ## The [Dataset](https://www.kaggle.com/datasets/andradaolteanu/gtzan-dataset-music-genre-classification?resource=download) used for development (Proof of Concept)
 

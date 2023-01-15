@@ -9,7 +9,7 @@ import sys
 import os
 import json
 
-DATASET = "example-train/GTZAN-Full"
+DATASET = "example-train/GTZAN-Reduced"
 OUTPUT_FILE = "data.json"
 
 IMG_DIR = "mel/"

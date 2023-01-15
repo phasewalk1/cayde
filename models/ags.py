@@ -156,6 +156,7 @@ class BinaryClassifierCNN(nn.Module):
 
 class CRNNExtractorModel(nn.Module):
     def __init__(self):
+        super(CRNNExtractorModel, self).__init__()
         # Setup the convolutional/batch-norm layers
         self.conv1 = nn.Conv2d(
             in_channels=68,
@@ -165,6 +166,7 @@ class CRNNExtractorModel(nn.Module):
             padding=1,
         )
         self.bn1 = nn.BatchNorm2d(137)
+        self.maxpool1 = nn.MaxPool2d(kernel_size=(2, 2), stride=2)
 
         self.conv2 = nn.Conv2d(
             in_channels=137,
@@ -174,6 +176,7 @@ class CRNNExtractorModel(nn.Module):
             padding=1,
         )
         self.bn2 = nn.BatchNorm2d(137)
+        self.maxpool2 = nn.MaxPool2d(kernel_size=(3, 3), stride=3)
 
         self.conv3 = nn.Conv2d(
             in_channels=137,
@@ -183,6 +186,7 @@ class CRNNExtractorModel(nn.Module):
             padding=1,
         )
         self.bn3 = nn.BatchNorm2d(137)
+        self.maxpool3 = nn.MaxPool2d(kernel_size=(4, 4), stride=4)
 
         self.conv4 = nn.Conv2d(
             in_channels=137,
@@ -192,17 +196,52 @@ class CRNNExtractorModel(nn.Module):
             padding=1,
         )
         self.bn4 = nn.BatchNorm2d(137)
+        self.maxpool4 = nn.MaxPool2d(kernel_size=(4, 4), stride=4)
 
+        # Setup the GRU layers
+        self.gru1 = nn.GRU(
+            input_size=68,
+            hidden_size=68,
+            num_layers=1,
+            batch_first=True,
+        )
+        self.gru2 = nn.GRU(
+            input_size=68,
+            hidden_size=68,
+            num_layers=1,
+            batch_first=True,
+        )
+
+        # Dropout normalization
+        self.dropout = nn.Dropout(p=0.1)
+        # ReLU mid-layer activation
         self.relu = nn.ReLU()
+        # Output layer activation
+        self.sigmoid = nn.Sigmoid()
 
     def forward(self, x):
         # layer 1 pass
         x = self.relu(self.bn1(self.conv1(x)))
+        x = self.dropout(x)
+        x = self.maxpool1(x)
         # layer 2 pass
         x = self.relu(self.bn2(self.conv2(x)))
+        x = self.dropout(x)
+        x = self.maxpool2(x)
         # layer 3 pass
         x = self.relu(self.bn3(self.conv3(x)))
+        x = self.dropout(x)
+        x = self.maxpool3(x)
         # layer 4 pass
         x = self.relu(self.bn4(self.conv4(x)))
+        x = self.dropout(x)
+        x = self.maxpool4(x)
+        
+        # reshape the feature maps to be fed into the GRU
+        x = x.reshape(x.size(0), x.size(1), -1)
+        x, _ = self.gru1(x)
+        x, _ = self.gru2(x)
+        x = x.squeeze(dim=1)
 
-        return x
+        # output the sigmmoid activation of the output layer
+        return self.sigmoid(x)
