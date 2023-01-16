@@ -1,7 +1,11 @@
 import click
+import subprocess
 
-from wrangling.wrangler import Wrangler, WMODES as MODES
+from wrangling.wrangler import Wrangler
 from wrangling.fetcher import FFLAGS
+
+
+MODES = ["mfcc", "encode", "fetch", "sundance"]
 
 
 @click.command()
@@ -19,8 +23,13 @@ from wrangling.fetcher import FFLAGS
 def main(mode, x=None):
     print(f"Running ikora.py in {mode}:[{x}] mode...")
 
-    wrangler = Wrangler(mode=mode, flags=x)
-    wrangler.preprocess()
+    if mode != "sundance":
+        wrangler = Wrangler(mode=mode, flags=x)
+        wrangler.preprocess()
+    else:
+        print("Sundance mode engaged ...")
+        cmd = "cd sundance && cargo run -- -d ../mel/"
+        subprocess.run(cmd, shell=True)
 
 
 if __name__ == "__main__":

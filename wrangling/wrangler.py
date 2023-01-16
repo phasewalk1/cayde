@@ -10,8 +10,6 @@ OUTPUT_FILE = "data.json"
 IMG_DIR = "mel/"
 ENCODINGS_OUT = "mel_encoded_batch-1.json"
 
-WMODES = ["mfcc", "encode", "fetch"]
-
 
 class Wrangler:
     def __init__(self, mode, flags=None):

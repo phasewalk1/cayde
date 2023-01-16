@@ -44,5 +44,9 @@ class Fetcher:
             else:
                 self.viewer.info("Dataset already cleaned!")
 
+        # Remove corrupted file
+        CORRUPTED = self.UNZIP_DIR + "/jazz/jazz.00054.wav"
+        os.remove(CORRUPTED)
+
         shutil.rmtree("example-train/GTZAN-Full/Data")
         self.viewer.info("Dataset cleaned!")

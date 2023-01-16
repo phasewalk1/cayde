@@ -2,20 +2,22 @@ use image::{DynamicImage, GenericImageView};
 use ndarray::Array2;
 
 #[derive(Default)]
-pub struct Encoder {
+pub struct SpectroOneHotEncoder {
     pixels: Array2<u8>,
 }
 
-impl Encoder {
+impl SpectroOneHotEncoder {
     pub fn new(image_path: &str) -> Self {
-        println!("Preparing encoder for {}", image_path);
+        pretty_env_logger::try_init().ok();
+
+        log::info!("Preparing encoder for {}", image_path);
         let img: DynamicImage = image::open(image_path).unwrap();
 
         let (width, height) = img.dimensions();
-        println!("Img Dim --> {}x{}", width, height);
+        log::debug!("Img Dim --> {}x{}", width, height);
 
         let mut pixels = Array2::default((width as usize, height as usize));
-        println!("Mat Shape --> {:?}", pixels.shape());
+        log::debug!("Mat Shape --> {:?}", pixels.shape());
 
         for (x, y, pixel) in img.pixels() {
             pixels[[x as usize, y as usize]] = pixel.0;
@@ -24,22 +26,25 @@ impl Encoder {
         // extract the u8 values from the pixels
         let pixels = pixels.mapv(|value| value[0]);
 
-        return Encoder { pixels };
+        return SpectroOneHotEncoder { pixels };
     }
 
-    pub fn encode(&self) -> Vec<usize> {
+    pub fn encode(&mut self) -> Vec<[usize; 2]> {
+        log::info!("Encoding ...");
+
         let mut encoded = Vec::new();
         for row in self.pixels.rows() {
             let mut encoded_row = Vec::new();
             for pixel in row {
-                let encoded_pixel: usize = match pixel {
-                    1 => 1,
-                    _ => 0,
+                let encoded_pixel: [usize; 2] = match pixel {
+                    1 => [0 as usize, 1 as usize],
+                    _ => [1 as usize, 0 as usize],
                 };
                 encoded_row.push(encoded_pixel);
             }
             encoded.extend(encoded_row);
         }
+
         return encoded;
     }
 }

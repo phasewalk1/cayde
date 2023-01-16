@@ -4,7 +4,7 @@ use std::env;
 use walkdir::WalkDir;
 
 mod encoders;
-use encoders::Encoder as SundanceEncoder;
+use encoders::SpectroOneHotEncoder as SundanceEncoder;
 
 #[derive(FromArgs)]
 #[argh(description = "Sundance Image Encoder")]
@@ -14,19 +14,17 @@ struct SundanceCli {
     img_dir: String,
 }
 
-pub type BatchedSundanceOutput = Vec<Vec<usize>>;
-
 fn main() {
     let args: SundanceCli = argh::from_env();
     let img_dir = args.img_dir;
 
-    let mut out = BatchedSundanceOutput::new();
+    let mut out = vec![vec![]];
     // walk the directory and find all images
     for img_path in WalkDir::new(img_dir) {
         let img_path = img_path.unwrap().path().to_str().unwrap().to_string();
         if img_path.ends_with(".jpg") || img_path.ends_with(".png") {
             println!("Found image: {}", img_path);
-            let encoder = SundanceEncoder::new(&img_path);
+            let mut encoder = SundanceEncoder::new(&img_path);
             let encoded = encoder.encode();
             out.push(encoded);
         }
