@@ -1,11 +1,7 @@
 import click
-import sys
 
-from wrangling.wrangler import Wrangler
-from wrangling.view import Viewer
-
-
-MODES = ["mfcc", "encode"]
+from wrangling.wrangler import Wrangler, WMODES as MODES
+from wrangling.fetcher import FFLAGS
 
 
 @click.command()
@@ -15,17 +11,16 @@ MODES = ["mfcc", "encode"]
     required=True,
     help="Choose 'mfcc' to preprocess the data into MFCCs, or 'encode' to encode the images into one-hot encodings.",
 )
-def main(mode):
-    view = Viewer()
+@click.option(
+    "-x",
+    type=click.Choice(FFLAGS),
+    required=False,
+)
+def main(mode, x=None):
+    print(f"Running ikora.py in {mode}:[{x}] mode...")
 
-    if mode not in MODES or mode is None:
-        view.critical("Invalid mode. Please choose 'mfcc' or 'encode'.")
-        sys.exit(1)
-    else:
-        view.info(f"Running ikora.py in {mode} mode...")
-
-        wrangler = Wrangler(mode=mode)
-        wrangler.preprocess()
+    wrangler = Wrangler(mode=mode, flags=x)
+    wrangler.preprocess()
 
 
 if __name__ == "__main__":
