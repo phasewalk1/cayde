@@ -38,14 +38,14 @@ struct SundanceCli {
 
     #[argh(option, short = 'd')]
     /// directory to scan for images
-    img_dir: String,
+    img_dir: Option<String>,
 }
 
 impl SundanceCli {
     fn encode(&self) {
         log::info!("Running in encode mode ...");
 
-        let img_dir = self.img_dir.clone();
+        let img_dir = self.img_dir.as_ref().unwrap().clone();
         let mut out = vec![vec![]];
         // walk the directory and find all images
         for img_path in WalkDir::new(img_dir) {
@@ -78,14 +78,14 @@ impl SundanceCli {
         const N_SAMPLES: usize = 44100;
 
         let (signal, sr, ns) =
-            SundanceBuilder::openwav("example-train/GTZAN-Reduced/blues/blues.00000.wav");
+            SundanceBuilder::openwav("../example-train/GTZAN-reduced/blues/blues.00000.wav");
 
         #[rustfmt::skip]
         let builder = SundanceBuilder::new(
             N_FFT, HOP_LENGTH, N_MELS, SAMPLE_RATE, N_SAMPLES, None, None
         );
 
-        todo!();
+        todo!("Implement spectrogram builder");
     }
 
     fn run(&self) {

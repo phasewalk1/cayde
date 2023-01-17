@@ -6,18 +6,23 @@ from wrangling.fetcher import FFLAGS
 
 
 MODES = ["mfcc", "encode", "fetch", "sundance"]
+SUNDANCE_OPTS = ["run", "install"]
+
+X = FFLAGS + SUNDANCE_OPTS
 
 
 @click.command()
+## IKORA MODE!!
 @click.option(
     "--mode",
     type=click.Choice(MODES),
     required=True,
     help="Choose 'mfcc' to preprocess the data into MFCCs, or 'encode' to encode the images into one-hot encodings.",
 )
+## FFLAGS UNIQUE TO MODES
 @click.option(
     "-x",
-    type=click.Choice(FFLAGS),
+    type=click.Choice(X),
     required=False,
 )
 def main(mode, x=None):
@@ -27,9 +32,12 @@ def main(mode, x=None):
         wrangler = Wrangler(mode=mode, flags=x)
         wrangler.preprocess()
     else:
-        print("Sundance mode engaged ...")
-        cmd = "cd sundance && cargo run -- -d ../mel/"
-        subprocess.run(cmd, shell=True)
+        if x is None or x == "run":
+            cmd = "cd sundance && cargo run -- -d ../mel/"
+            subprocess.run(cmd, shell=True)
+        elif x == "install":
+            cmd = "cd sundance && cargo install --path ."
+            subprocess.run(cmd, shell=True)
 
 
 if __name__ == "__main__":

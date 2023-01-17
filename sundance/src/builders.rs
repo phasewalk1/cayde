@@ -42,6 +42,7 @@ impl MelSpectroBuilder {
     }
 
     pub fn openwav(path: &str) -> (Vec<f32>, usize, usize) {
+        println!("Opening wav file: {}", path);
         let mut reader = WavReader::open(path).unwrap();
         let samples = reader
             .samples::<i16>()
