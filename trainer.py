@@ -4,7 +4,7 @@ import os
 import re
 import matplotlib.pyplot as plt
 
-from wrangling.view import Viewer
+from util.view import Viewer
 from tensorflow import keras
 from sklearn.model_selection import train_test_split
 

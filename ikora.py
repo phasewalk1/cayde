@@ -2,7 +2,7 @@ import click
 import subprocess
 
 from wrangling.wrangler import Wrangler
-from wrangling.fetcher import FFLAGS
+from util.fetcher import FFLAGS
 
 
 MODES = ["mfcc", "encode", "fetch", "sundance"]

@@ -7,7 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import json
 
-from .view import Viewer
+from ..util.view import Viewer
 
 # Set the sample rate for all files loaded from the DATASET_PATH
 SAMPLE_RATE = 22050

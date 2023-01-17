@@ -2,7 +2,7 @@
 
 from .preprocessors import MFCCBuilder
 from .encoder import BatchEncoder
-from .fetcher import Fetcher
+from ..util.fetcher import Fetcher
 
 DATASET = "example-train/GTZAN-Reduced"
 OUTPUT_FILE = "data.json"

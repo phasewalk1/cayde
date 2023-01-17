@@ -5,7 +5,7 @@ import os
 import json
 
 from PIL import Image
-from .view import Viewer
+from ..util.view import Viewer
 
 
 class Encoder:

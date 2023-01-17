@@ -1,6 +1,6 @@
 # References
 
-> > This project would not be possible without the contributions of many engineers and researchers before us.
+> This project would not be possible without the contributions of many engineers and researchers before us.
 
 The main paper that this implementation references and attributes credit to is:
 
@@ -20,7 +20,7 @@ Different implementations in the wild/pre-processing references:
 - [models](https://github.com/phasewalk1/cayde/tree/master/models) defines the various models implemented for the `cayde` system architecture.
 - [perf](https://github.com/phasewalk1/cayde/tree/master/perf) stores performance related statistical figures, such as train/test accuracy as a function of epoch over an entire solstice period.
 - [wrangling](https://github.com/phasewalk1/cayde/tree/master/wrangling) defines multiple classes used in the preprocessing stage of the data pipeline, such as the `MelSpectrogramBuilder`, `MFCCBuilder`, `BatchEncoder`, and the main class that performs a run through the entire pipeline, `Wrangler`. This directory also defines multiple utilities used in development such as the `Viewer` class which handles logging, and the `setfetch` script which uses the _Kaggle_ API to pull and unzip the full GTZAN dataset into the workspace.
-- [ikora.py](https://github.com/phasewalk1/cayde/tree/master/ikora.py) is the command-line interface into `Wrangler`, and is useful for running through the full pipeline in various modes, e.g. `['mfcc', 'encode']`
+- [ikora.py](https://github.com/phasewalk1/cayde/tree/master/ikora.py) is the command-line interface into `cayde`, and is useful for running through the full pipeline in various modes, e.g. `['mfcc', 'encode', 'sundance']`
 - [main.py](https://github.com/phasewalk1/cayde/tree/master/main.py) is the core training script that utilizes the `Trainer` defined in [trainer.py](https://github.com/phasewalk1/cayde/tree/master/trainer.py) to run batches of training solstices (train for `SOLSTICE * EPOCHS` epochs) while outputting the checkpoints of model weights at the end of each solstice.
 
 ### [Sundance](https://github.com/phasewalk1/cayde/tree/master/sundance)
@@ -83,7 +83,7 @@ Here's an example of a MFCC batch computed via the `MFCCBuilder.segmented_batch_
                 2.2130210399627686,
                 -0.7875062823295593
             ],
-            ...
+            [...]
         ]
 ]
 ```
