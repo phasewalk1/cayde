@@ -1,15 +1,18 @@
+#![allow(dead_code)]
+
 use dsp::window::Window;
 use hound::WavReader;
-use image::{ImageBuffer, Rgb};
 use rustfft::{num_complex::Complex, num_traits::Zero, FftPlanner};
 
+#[doc = "A struct that builds a spectrogram from a wav file"]
+#[derive(Debug)]
 pub struct MelSpectroBuilder {
     n_fft: usize,
     hop_length: usize,
     n_mels: usize,
     sample_rate: usize,
     n_samples: usize,
-    window: Window,
+    window: Option<Window>,
     samples: Option<Vec<f32>>,
 }
 
@@ -20,7 +23,7 @@ impl MelSpectroBuilder {
         n_mels: usize,
         sample_rate: usize,
         n_samples: usize,
-        window: Window,
+        window: Option<Window>,
         samples: Option<Vec<f32>>,
     ) -> MelSpectroBuilder {
         return MelSpectroBuilder {
